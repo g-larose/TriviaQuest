@@ -5,19 +5,24 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TriviaQuest.Interfaces;
+using TriviaQuest.Services;
 
 namespace TriviaQuest
 {
     public class Startup
     {
-        private readonly IHost _host;
-
-        public Startup()
+        
+        public static ServiceProvider ConfigureServices()
         {
-            _host = Host.CreateDefaultBuilder().ConfigureServices(services =>
-            {
-                
-            }).Build();
+            var services = new ServiceCollection();
+            services.AddSingleton<IDataProvider, DataProviderService>();
+
+            var serviceProvider = services.BuildServiceProvider();
+
+            return serviceProvider;
         }
+
+
     }
 }

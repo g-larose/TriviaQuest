@@ -1,10 +1,15 @@
-﻿namespace TriviaQuest
+﻿using TriviaQuest.Interfaces;
+using TriviaQuest.Services;
+
+namespace TriviaQuest
 {
     internal class Program
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello, World!");
+            var Bot = new Bot();
+            Bot.RunAsync().GetAwaiter().GetResult();
         }
+
     }
 }
