@@ -105,7 +105,7 @@ namespace TriviaQuest.Extensions
                 "tv" => "14",
                 "video games" => "15",
                 "board games" => "16",
-                "science" => ShuffleHelper.ShuffleCategory(new string[] { "nature", "computers", "mathmatics", "gadgets" }),
+                "science" => ShuffleHelper.ShuffleScienceCategory(new string[] { "nature", "computers", "mathmatics", "gadgets" }),
                 "mythology" => "20",
                 "sports" => "21",
                 "geography" => "22",
@@ -113,7 +113,7 @@ namespace TriviaQuest.Extensions
                 "politics" => "24",
                 "celebrities" => "26",
                 "animals" => "27",
-                "entertainment" => ShuffleHelper.ShuffleCategory(new string[] { "comics", "anime", "cartoons" }),
+                "entertainment" => ShuffleHelper.ShuffleEntertainmentCategory(new string[] { "comics", "anime", "cartoons" }),
                 _ => "9"
             };
             return result;
@@ -127,7 +127,9 @@ namespace TriviaQuest.Extensions
                 { "&#039;", "'" },
                 { "&hellip;", "'" },
                 { "&rdque;", "'" },
-                { "&rsquo;", "'" }
+                { "&rsquo;", "'" },
+                { "&amp;", "'" },
+                { "&ldquo;", "'" }
             };
 
             string result = Regex.Replace(input,

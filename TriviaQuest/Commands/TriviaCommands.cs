@@ -1,4 +1,5 @@
-﻿using Guilded.Commands;
+﻿using Guilded.Base.Embeds;
+using Guilded.Commands;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,30 +15,85 @@ namespace TriviaQuest.Commands
 {
     public class TriviaCommands: CommandModule
     {
-        [Command(Aliases = [ "start", "ask" ])]
+        private List<Question> questions = new();
+        [Command(Aliases = [ "question", "ask" ])]
         [Description("starts a new trivia game")]
-        public async Task Start(CommandEvent invokator, string category)
+        public async Task Start(CommandEvent invokator)
         {
-            var trivia = new TriviaProviderService();
-            var questions_root = await trivia.LoadQuestionsAsync(category, "easy", "multiple");
-            var rnd = new Random();
-            var questions = new List<Question>();
-            foreach (var item in questions_root.results!)
+            var category = "general knowledge";
+            try
             {
-                var quest = item.question!.Sanitize();
-                var incorrect_answers = item.incorrect_answers;
-                var correct_answer = item.correct_answer;
-                var cat = item.category;
-                var dif = item.difficulty;
-                var type = item.type;
 
-                questions.Add(new Question(cat, type, dif, quest, correct_answer, incorrect_answers));
+            
+                if (questions.Count < 1)
+                {
+                    var trivia = new TriviaProviderService();
+                    var questions_root = await trivia.LoadQuestionsAsync(category, "easy", "multiple");
+                    var rnd = new Random();
+
+                    foreach (var q in questions_root.results!)
+                    {
+                        var quest = q.question!.Sanitize();
+                        var incorrect_answers = q.incorrect_answers;
+                        var correct_answer = q.correct_answer;
+                        var cat = q.category;
+                        var dif = q.difficulty;
+                        var type = q.type;
+
+                        questions.Add(new Question(cat, type, dif, quest, correct_answer, incorrect_answers));
+                    }
+                    var index = rnd.Next(questions.Count);
+                    var picked_question = questions[index];
+                    var answers = new string[] { picked_question.incorrect_answers[0], picked_question.incorrect_answers[1], picked_question.incorrect_answers[2], picked_question.correct_answer };
+                    var shuffled_answers = answers.Shuffle();
+                    var embed = new Embed()
+                    {
+                        Title = picked_question.question,
+                        Description = $"Category - {picked_question.category}\r\n\r\n-| **Answers** |-\r\n1.{shuffled_answers[0].Sanitize()}\r\n" +
+                                      $"2.{shuffled_answers[1].Sanitize()}\r\n" +
+                                      $"3.{shuffled_answers[2].Sanitize()}\r\n" +
+                                      $"4.{shuffled_answers[3].Sanitize()}",
+                        Footer = new EmbedFooter($"{invokator.ParentClient.Name}"),
+                        Timestamp = DateTime.Now
+                    };
+
+                    await invokator.CreateMessageAsync(embed);
+                    questions.Remove(picked_question);
+                }
+                else
+                {
+                    if (questions.Count > 0)
+                    {
+                        var rnd = new Random();
+                        var index = rnd.Next(questions.Count);
+                        var picked_question = questions[index];
+                        var answers = new string[] { picked_question.incorrect_answers[0], picked_question.incorrect_answers[1], picked_question.incorrect_answers[2], picked_question.correct_answer };
+                        var shuffled_answers = answers.Shuffle();
+                        var embed = new Embed()
+                        {
+                            Title = picked_question.question,
+                            Description = $"Category - {picked_question.category}\r\n\r\n-| **Answers** |-\r\n1.{shuffled_answers[0].Sanitize()}\r\n" +
+                                          $"2.{shuffled_answers[1].Sanitize()}\r\n" +
+                                          $"3.{shuffled_answers[2].Sanitize()}\r\n" +
+                                          $"4.{shuffled_answers[3].Sanitize()}",
+                            Footer = new EmbedFooter($"{invokator.ParentClient.Name}"),
+                            Timestamp = DateTime.Now
+                        };
+
+                        await invokator.CreateMessageAsync(embed);
+                        questions.Remove(picked_question);
+                    }
+
+                    if (questions.Count == 0)
+                        await invokator.CreateMessageAsync("\r\n**question list is empty, regenerating questions...**");
+                }
             }
-            var index = rnd.Next(1, questions.Count);
-            var picked_question = questions[index];
-            var answers = new string[] { picked_question.incorrect_answers[0], picked_question.incorrect_answers[1], picked_question.incorrect_answers[2], picked_question.correct_answer };
-            var shuffled_answers = answers.Shuffle();
-            var test = "";
+            catch (Exception ex)
+            {
+
+                var test = ex.Message;
+            }
+
         }
     }
 }

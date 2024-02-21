@@ -8,12 +8,11 @@ namespace TriviaQuest.Helpers
 {
     public class ShuffleHelper
     {
-        public static string ShuffleCategory(string[] cats)
+        public static string ShuffleScienceCategory(string[] cats)
         {
-            Random rnd = new Random();
-            int index = rnd.Next(0, cats.Length);
-            var result = cats[index];
-
+           Random rnd = new Random();
+           int index = rnd.Next(0, cats.Length);
+           var result = cats[index];
            switch (result)
             {
                 case "nature":
@@ -24,6 +23,18 @@ namespace TriviaQuest.Helpers
                     return "19";
                 case "gadgets":
                     return "30";
+                default:
+                    return "17";
+            }
+        }
+
+        public static string ShuffleEntertainmentCategory(string[] cats)
+        {
+            Random rnd = new Random();
+            int index = rnd.Next(0, cats.Length);
+            var result = cats[index];
+            switch (result)
+            {
                 case "comics":
                     return "29";
                 case "anime":
@@ -33,6 +44,7 @@ namespace TriviaQuest.Helpers
                 default:
                     return "17";
             }
+            
         }
     }
 }

@@ -10,7 +10,7 @@ namespace TriviaQuest.Services
         public async Task<Root> LoadQuestionsAsync(string category, string difficulty, string type)
         {
             var cat = category.FromCatToNumber();
-            var endPoint = $"https://opentdb.com/api.php?amount=50&{cat}=9&difficulty={difficulty}&type={type}";
+            var endPoint = $"https://opentdb.com/api.php?amount=5&category={cat}&difficulty={difficulty}&type={type}";
             HttpClient client = new HttpClient();
             var response = await client.GetAsync(endPoint);
             var content = await response.Content.ReadAsStringAsync();
