@@ -3,6 +3,7 @@ using Guilded.Commands;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,84 +16,83 @@ namespace TriviaQuest.Commands
 {
     public class TriviaCommands: CommandModule
     {
-        private List<Question> questions = new();
+
         [Command(Aliases = [ "question", "ask" ])]
         [Description("starts a new trivia game")]
         public async Task Start(CommandEvent invokator)
         {
+            var trivia = new TriviaHelper();
             var category = "general knowledge";
-            try
+            var question = await trivia.AskQuestion(category);
+            var answers = new string[] { question.incorrect_answers[0], question.incorrect_answers[1], question.incorrect_answers[2], question.correct_answer };
+            var correct_answer = question.correct_answer;
+          
+            var shuffled_answers = answers.Shuffle();
+            var correctAnswerIndex = 0;
+            var count = 0;
+            foreach (var answer in shuffled_answers)
             {
-
-            
-                if (questions.Count < 1)
+                if (answer == correct_answer)
                 {
-                    var trivia = new TriviaProviderService();
-                    var questions_root = await trivia.LoadQuestionsAsync(category, "easy", "multiple");
-                    var rnd = new Random();
-
-                    foreach (var q in questions_root.results!)
-                    {
-                        var quest = q.question!.Sanitize();
-                        var incorrect_answers = q.incorrect_answers;
-                        var correct_answer = q.correct_answer;
-                        var cat = q.category;
-                        var dif = q.difficulty;
-                        var type = q.type;
-
-                        questions.Add(new Question(cat, type, dif, quest, correct_answer, incorrect_answers));
-                    }
-                    var index = rnd.Next(questions.Count);
-                    var picked_question = questions[index];
-                    var answers = new string[] { picked_question.incorrect_answers[0], picked_question.incorrect_answers[1], picked_question.incorrect_answers[2], picked_question.correct_answer };
-                    var shuffled_answers = answers.Shuffle();
-                    var embed = new Embed()
-                    {
-                        Title = picked_question.question,
-                        Description = $"Category - {picked_question.category}\r\n\r\n-| **Answers** |-\r\n1.{shuffled_answers[0].Sanitize()}\r\n" +
-                                      $"2.{shuffled_answers[1].Sanitize()}\r\n" +
-                                      $"3.{shuffled_answers[2].Sanitize()}\r\n" +
-                                      $"4.{shuffled_answers[3].Sanitize()}",
-                        Footer = new EmbedFooter($"{invokator.ParentClient.Name}"),
-                        Timestamp = DateTime.Now
-                    };
-
-                    await invokator.CreateMessageAsync(embed);
-                    questions.Remove(picked_question);
+                    correctAnswerIndex = count;
+                    break;
                 }
-                else
-                {
-                    if (questions.Count > 0)
-                    {
-                        var rnd = new Random();
-                        var index = rnd.Next(questions.Count);
-                        var picked_question = questions[index];
-                        var answers = new string[] { picked_question.incorrect_answers[0], picked_question.incorrect_answers[1], picked_question.incorrect_answers[2], picked_question.correct_answer };
-                        var shuffled_answers = answers.Shuffle();
-                        var embed = new Embed()
-                        {
-                            Title = picked_question.question,
-                            Description = $"Category - {picked_question.category}\r\n\r\n-| **Answers** |-\r\n1.{shuffled_answers[0].Sanitize()}\r\n" +
-                                          $"2.{shuffled_answers[1].Sanitize()}\r\n" +
-                                          $"3.{shuffled_answers[2].Sanitize()}\r\n" +
-                                          $"4.{shuffled_answers[3].Sanitize()}",
-                            Footer = new EmbedFooter($"{invokator.ParentClient.Name}"),
-                            Timestamp = DateTime.Now
-                        };
-
-                        await invokator.CreateMessageAsync(embed);
-                        questions.Remove(picked_question);
-                    }
-
-                    if (questions.Count == 0)
-                        await invokator.CreateMessageAsync("\r\n**question list is empty, regenerating questions...**");
-                }
+                count++;
             }
-            catch (Exception ex)
+            var embed = new Embed()
             {
+                Title = question.question,
+                Description = $"Category - {question.category}\r\n\r\n-| **Answers** |-\r\n1.{shuffled_answers[0].Sanitize()}\r\n" +
+                              $"2.{shuffled_answers[1].Sanitize()}\r\n" +
+                              $"3.{shuffled_answers[2].Sanitize()}\r\n" +
+                              $"4.{shuffled_answers[3].Sanitize()}",
+                Footer = new EmbedFooter($"{invokator.ParentClient.Name}"),
+                Timestamp = DateTime.Now
+            };
+            var emojis = new uint[] { 2245981, 2245982, 2245983, 2245984 };
 
-                var test = ex.Message;
+            var message = await invokator.CreateMessageAsync(embed);
+
+            foreach (var emoji in emojis)
+            {
+                await message.AddReactionAsync(emoji);
             }
+
+            invokator.ParentClient.MessageReactionAdded
+                         .Where(e => e.CreatedBy == invokator.CreatedBy)
+                         .Subscribe(async reaction =>
+                         {
+                             var id = reaction.Name switch
+                             {
+                                 ":one:" => 0,
+                                 ":two:" => 1,
+                                 ":three:" => 2,
+                                 ":four:" => 3,
+                                 _ => 4
+                             };
+
+                             switch (reaction.Name)
+                             {
+                                 case ":one:":
+                                     if (id == correctAnswerIndex)
+                                         await invokator.ReplyAsync("correct");
+                                     break;
+                                 case ":two:":
+                                     if (id == correctAnswerIndex)
+                                         await invokator.ReplyAsync("correct");
+                                     break;
+                                 case ":three:":
+                                     if (id == correctAnswerIndex)
+                                         await invokator.ReplyAsync("correct");
+                                     break;
+                                 case ":four:":
+                                     if (id == correctAnswerIndex)
+                                         await invokator.ReplyAsync("correct");
+                                     break;
+                             }
+                            
+
+                         });
 
         }
     }
