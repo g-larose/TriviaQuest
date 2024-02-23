@@ -12,11 +12,13 @@ namespace TriviaQuest.Helpers
     public class TriviaHelper
     {
         private List<Question> _questions = new();
-        public async Task<Question> AskQuestion(string category)
+        public async Task<Question> AskQuestionAsync(string category)
         {
+            _questions = new();
             var rnd = new Random();
             if (_questions.Count < 1)
             {
+                
                 var trivia = new TriviaProviderService();
                 var questions_root = await trivia.LoadQuestionsAsync(category, "easy", "multiple");
                 
@@ -34,6 +36,7 @@ namespace TriviaQuest.Helpers
                 }
                 var index = rnd.Next(_questions.Count);
                 var picked_question = _questions[index];
+                _questions.Remove(picked_question);
                 return picked_question;
             }
             else

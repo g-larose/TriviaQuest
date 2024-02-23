@@ -23,7 +23,7 @@ namespace TriviaQuest.Commands
         {
             var trivia = new TriviaHelper();
             var category = "general knowledge";
-            var question = await trivia.AskQuestion(category);
+            var question = await trivia.AskQuestionAsync(category);
             var answers = new string[] { question.incorrect_answers[0], question.incorrect_answers[1], question.incorrect_answers[2], question.correct_answer };
             var correct_answer = question.correct_answer;
           
@@ -45,7 +45,8 @@ namespace TriviaQuest.Commands
                 Description = $"Category - {question.category}\r\n\r\n-| **Answers** |-\r\n1.{shuffled_answers[0].Sanitize()}\r\n" +
                               $"2.{shuffled_answers[1].Sanitize()}\r\n" +
                               $"3.{shuffled_answers[2].Sanitize()}\r\n" +
-                              $"4.{shuffled_answers[3].Sanitize()}",
+                              $"4.{shuffled_answers[3].Sanitize()}\r\n" +
+                              $"- |Correct Answer| - -> {question.correct_answer}",
                 Footer = new EmbedFooter($"{invokator.ParentClient.Name}"),
                 Timestamp = DateTime.Now
             };
@@ -64,33 +65,75 @@ namespace TriviaQuest.Commands
                          {
                              var id = reaction.Name switch
                              {
-                                 ":one:" => 0,
-                                 ":two:" => 1,
-                                 ":three:" => 2,
-                                 ":four:" => 3,
+                                 "one" => 0,
+                                 "two" => 1,
+                                 "three" => 2,
+                                 "four" => 3,
                                  _ => 4
                              };
 
                              switch (reaction.Name)
                              {
-                                 case ":one:":
+                                 case "one":
                                      if (id == correctAnswerIndex)
+                                     {
                                          await invokator.ReplyAsync("correct");
+                                         foreach (var r in emojis)
+                                         {
+                                             await message.RemoveReactionAsync(r);
+                                             await Task.Delay(500);
+                                             
+                                         }
+                                         //message = null;
+                                         return;
+                                     }
                                      break;
-                                 case ":two:":
+                                 case "two":
                                      if (id == correctAnswerIndex)
+                                     {
                                          await invokator.ReplyAsync("correct");
+                                         foreach (var r in emojis)
+                                         {
+                                             await message.RemoveReactionAsync(r);
+                                             await Task.Delay(500);
+                                            
+                                         }
+                                         //message = null;
+                                         return;
+                                     }
                                      break;
-                                 case ":three:":
+                                 case "three":
                                      if (id == correctAnswerIndex)
+                                     {
                                          await invokator.ReplyAsync("correct");
+                                         foreach (var r in emojis)
+                                         {
+                                             await message.RemoveReactionAsync(r);
+                                             await Task.Delay(500);
+
+                                         }
+                                        // message = null;
+                                         return;
+                                     }
                                      break;
-                                 case ":four:":
+                                 case "four":
                                      if (id == correctAnswerIndex)
+                                     {
                                          await invokator.ReplyAsync("correct");
+                                         foreach (var r in emojis)
+                                         {
+                                             await message.RemoveReactionAsync(r);
+                                             await Task.Delay(500);
+                                         }
+                                         //message = null;
+                                         return;
+                                     }
+                                     break;
+                                 default:
                                      break;
                              }
-                            
+                             //if (id == correctAnswerIndex)
+                             //    await invokator.CreateMessageAsync("correct");
 
                          });
 
